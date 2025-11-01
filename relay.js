@@ -21,7 +21,7 @@ wss.on("connection", (ws) => {  // add the client to the list of clients and boa
   ws.on("message", (msg) => {
     const text = JSON.parse(msg.toString())  // convert message to json
     console.log("[traffic] RECIEVED:", text);
-
+    
     if (text["type"] == "connect") {  // use the connect message to assign the client to a board
       bds[-1] = text["board"]
       console.log(`[boards] BOARD ${text["board"]} ADDED TO CLIENT ID ${cts.length-1}`)
