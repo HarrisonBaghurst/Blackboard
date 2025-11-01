@@ -1,12 +1,16 @@
+'use client'
+
 import Board from '@/components/Board'
 import React from 'react'
-import WebSocket from 'ws';
+import { useParams } from "next/navigation";
 
 const page = () => {
+    
     const socket = new WebSocket("ws://localhost:8080");
+    let msg = {"type": "connect", "board": useParams()["slug"]}
     socket.onopen = () => {
         console.log("[client] SEND: Connected! eeee");
-        socket.send("Hello, server!");
+        socket.send(JSON.stringify(msg));
     };
 
     socket.onmessage = (event) => {

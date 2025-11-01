@@ -7,18 +7,6 @@ const Page = () => {
     // this code is temporary - redirect user to random uuid
     const uuid = crypto.randomUUID();
 
-
-        // socket stuff
-        /*const wss = new WebSocketServer({ port: 8080 });
-        wss.on("connection", (ws) => {
-        console.log("Client connected");
-        ws.on("message", (message) => {
-            console.log("Received:", message);
-            ws.send(`Echo: ${message}`);
-        });
-        });*/
-
-        // uuid
     redirect(`/board/${uuid}`);
 
     return (
