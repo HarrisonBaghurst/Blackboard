@@ -3,7 +3,7 @@
 ## Todo
 
 ### whiteboard drawing function
-- [ ] convert line to proper curve 
+- [x] ~~convert line to proper curve~~
 - [x] ~~tool selection bar~~
 - [ ] eraser 
 - [x] ~~undo and redo stack~~ 
