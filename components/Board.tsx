@@ -22,6 +22,8 @@ const Board = () => {
     const [currentStroke, setCurrentStroke] = useState<Stroke | null>(null);
     const [strokes, setStrokes] = useState<Stroke[]>([]);
     const [currentColour, setCurrentColour] = useState('hsl(44,53%,74%)');
+    const [id, setID] = useState<Number | null>(null);
+    const [recieveblocker, setRecieveBlocker] = useState(false)
 
     const [removedStrokes, setRemovedStrokes] = useState<Stroke[]>([]);
 
@@ -29,22 +31,11 @@ const Board = () => {
 
     const params = useParams();
 
+
     useEffect(() => {
 
         // socket setup
-        setSocket(new WebSocket("ws://localhost:8080"));
-
-        if (socket) {
-            socket.onopen = () => {
-                console.log("[client] SEND: Connected! eeee");
-                socket.send(JSON.stringify({"type": "connect", "board": params["slug"]}));
-            };
-            
-            socket.onmessage = (event: MessageEvent) => {
-                setStrokes(JSON.parse("[" + event.data + "]"))
-                console.log("[client] RERENDERED:", event.data);
-            };
-        }
+        setSocket(new WebSocket("ws://10.247.34.160:8080"));
 
         // dynamically set the size of the canvas to the container width
         const canvas = canvasRef.current;
@@ -72,6 +63,32 @@ const Board = () => {
 
     }, []);
 
+
+    useEffect(() => {
+        if (socket) {
+            console.log("eeeeeeeeeeeeeeeeee")
+            socket.onopen = () => {
+                console.log("[client] SEND: Connected! eeee");
+                const msg = JSON.stringify({"type": "connect", "board": params["slug"]})
+                socket.send(msg);
+            };
+            
+            socket.onmessage = (event: MessageEvent) => {
+                console.log("RECIEVED" + JSON.parse(event.data))
+                const received = JSON.parse(event.data)
+                if (received['type'] == "handshake") {
+                    setID(received['id'])
+                } else {
+                    console.log(strokes, JSON.parse(event.data))
+                    if (strokes == JSON.parse(event.data)) return;
+                    setRecieveBlocker(true)
+                    setStrokes(JSON.parse(event.data))
+                    console.log("[client] RERENDERED:", event.data);
+                }
+            };
+        }
+    }, [socket]);
+    
     // update canvas upon change to strokes array
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -92,6 +109,15 @@ const Board = () => {
                 else ctx.lineTo(point.x, point.y);
             });
             ctx.stroke();
+        }
+
+        if (recieveblocker) {
+            setRecieveBlocker(false)
+        } else {
+            if (!socket) return;
+            console.log("SENDING", JSON.stringify(strokes))
+            socket.send(JSON.stringify(strokes));
+            setRecieveBlocker(false)
         }
 
     }, [strokes]); 
@@ -121,8 +147,6 @@ const Board = () => {
         }
         setCurrentStroke(null);
         setRemovedStrokes([]);
-        if (!socket) return;
-        socket.send(strokes.toString());
     }
 
     const handleUndo = () => {
@@ -133,8 +157,6 @@ const Board = () => {
             setRemovedStrokes((rPrev) => [...rPrev, lastStroke]);
             return updatedStrokes;
         })
-        if (!socket) return;
-        socket.send(strokes.toString());
     }
 
     const handleRedo = () => {
@@ -145,8 +167,6 @@ const Board = () => {
             setStrokes((prev) => [...prev, lastRemovedStroke]);
             return updatedRemoved;
         })
-        if (!socket) return;
-        socket.send(strokes.toString());
     }
 
     const handleChangeColour = (colour: string) => {

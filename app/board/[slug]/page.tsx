@@ -1,24 +1,14 @@
-'use client';
+'use client'
 
-import { useParams } from 'next/navigation';
-import { useEffect } from 'react';
-import Board from '@/components/Board';
-import { connect } from '@/lib/network';
+import Board from '@/components/Board'
+import React from 'react'
 
-const Page = () => {
-  const params = useParams();
-  useEffect(() => {
-        const slug = params?.slug;
-        if (typeof slug === "string") {
-            connect(slug);
-        }
-  }, [params]);
+const page = () => {
+    return (
+        <div className='w-screen h-screen'>
+            <Board />
+        </div>
+    )
+}
 
-  return (
-    <div className="w-screen h-screen">
-      <Board />
-    </div>
-  );
-};
-
-export default Page;
+export default page
