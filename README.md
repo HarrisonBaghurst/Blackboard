@@ -5,7 +5,7 @@
 ### whiteboard drawing function
 - [x] ~~convert line to proper curve~~
 - [x] ~~tool selection bar~~
-- [ ] eraser 
+- [x] ~~eraser~~
 - [x] ~~undo and redo stack~~ 
 - [ ] import and export whiteboard information
 - [ ] panning on whiteboard
@@ -14,6 +14,6 @@
 - [ ] whiteboard sharing UI
 
 ## other functions 
-- [ ] multi user whiteboard 
+- [x] ~~multi user whiteboard~~
 - [ ] AI / ML take whiteboard and convert to .tex
 
