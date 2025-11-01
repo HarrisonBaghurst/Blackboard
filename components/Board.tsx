@@ -25,23 +25,27 @@ const Board = () => {
 
     const [removedStrokes, setRemovedStrokes] = useState<Stroke[]>([]);
 
-    // SOCKET
-    const socket = new WebSocket("ws://localhost:8080");
-    let msg = {"type": "connect", "board": useParams()["slug"]}
-    socket.onopen = () => {
-        console.log("[client] SEND: Connected! eeee");
-        socket.send(JSON.stringify(msg));
-    };
-    socket.onmessage = (event: MessageEvent) => {
-        setStrokes(JSON.parse("[" + event.data + "]"))
-        console.log("[client] RERENDERED:", event.data);
-    };
+    const [socket, setSocket] = useState<WebSocket | null>(null);
 
-    socket.onclose = () => {
-        console.log("[client] DISCONNECTED");
-    };
+    const params = useParams();
 
     useEffect(() => {
+
+        // socket setup
+        setSocket(new WebSocket("ws://localhost:8080"));
+
+        if (socket) {
+            socket.onopen = () => {
+                console.log("[client] SEND: Connected! eeee");
+                socket.send(JSON.stringify({"type": "connect", "board": params["slug"]}));
+            };
+            
+            socket.onmessage = (event: MessageEvent) => {
+                setStrokes(JSON.parse("[" + event.data + "]"))
+                console.log("[client] RERENDERED:", event.data);
+            };
+        }
+
         // dynamically set the size of the canvas to the container width
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -117,7 +121,8 @@ const Board = () => {
         }
         setCurrentStroke(null);
         setRemovedStrokes([]);
-        socket.send(strokes.toString())
+        if (!socket) return;
+        socket.send(strokes.toString());
     }
 
     const handleUndo = () => {
@@ -128,7 +133,8 @@ const Board = () => {
             setRemovedStrokes((rPrev) => [...rPrev, lastStroke]);
             return updatedStrokes;
         })
-        socket.send(strokes.toString())
+        if (!socket) return;
+        socket.send(strokes.toString());
     }
 
     const handleRedo = () => {
@@ -139,7 +145,8 @@ const Board = () => {
             setStrokes((prev) => [...prev, lastRemovedStroke]);
             return updatedRemoved;
         })
-        socket.send(strokes.toString())
+        if (!socket) return;
+        socket.send(strokes.toString());
     }
 
     const handleChangeColour = (colour: string) => {
