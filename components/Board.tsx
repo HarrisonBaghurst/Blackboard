@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import ToolBar from './ToolBar';
+import { useParams } from 'next/navigation';
 import hypo from '@/lib/numUtils';
 
 type Point = {
@@ -25,10 +26,21 @@ const Board = () => {
     const [currentStroke, setCurrentStroke] = useState<Stroke | null>(null);
     const [strokes, setStrokes] = useState<Stroke[]>([]);
     const [currentColour, setCurrentColour] = useState('hsl(44,53%,74%)');
+    const [id, setID] = useState<number | null>(null);
+    const [recieveblocker, setRecieveBlocker] = useState(false)
 
     const [removedStrokes, setRemovedStrokes] = useState<Stroke[]>([]);
 
+    const [socket, setSocket] = useState<WebSocket | null>(null);
+
+    const params = useParams();
+
+
     useEffect(() => {
+
+        // socket setup
+        setSocket(new WebSocket("ws://10.247.34.160:8080"));
+
         // dynamically set the size of the canvas to the container width
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -55,6 +67,31 @@ const Board = () => {
 
     }, []);
 
+
+    useEffect(() => {
+        if (socket) {
+            socket.onopen = () => {
+                console.log("[client] SENT CONNECT REQ");
+                const msg = JSON.stringify({"type": "connect", "board": params["slug"]})
+                socket.send(msg);
+            };
+            
+            socket.onmessage = (event: MessageEvent) => {
+                const received = JSON.parse(event.data)
+                if (received['type'] == "handshake") {
+                    console.log("[client] RECEIVED HANDSHAKE; ID" + received['id'])
+                    setID(received['id'])
+                } else {
+                    if (strokes == JSON.parse(event.data)) return;
+                    console.log("[client] RECIEVED PURGED BOARD")
+                    setRecieveBlocker(true)
+                    setStrokes(JSON.parse(event.data))
+                    console.log("[client] RE-RENDERED");
+                }
+            };
+        }
+    }, [socket]);
+    
     // update canvas upon change to strokes array
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -100,7 +137,18 @@ const Board = () => {
         }
 
     }, [strokes, currentStroke]); 
-
+  
+    useEffect(() => {
+      if (recieveblocker) {
+          setRecieveBlocker(false)
+      } else {
+          if (!socket) return;
+          console.log("SENDING", JSON.stringify(strokes))
+          socket.send(JSON.stringify(strokes));
+          setRecieveBlocker(false)
+      };
+    }, [strokes]);
+        
     const handleMouseDown = (e: React.MouseEvent) => {
         setIsToolDown(true);
         if (tool === 'chalk') {

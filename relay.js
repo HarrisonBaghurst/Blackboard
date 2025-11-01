@@ -12,8 +12,8 @@ wss.on("connection", (ws) => {  // add the client to the list of clients and boa
   ws.on("close", () => {
     const idx = cts.indexOf(ws);
     if (idx !== -1) {  // remove the client from the lists if it disconnects
-      cts.splice(idx, 1)
-      bds.splice(idx, 1)
+      cts[idx] = null  // null
+      bds[idx] = null
     }
     console.log("[network] DISCONNECTED, removed client at index", idx);
   });
@@ -21,16 +21,20 @@ wss.on("connection", (ws) => {  // add the client to the list of clients and boa
   ws.on("message", (msg) => {
     const text = JSON.parse(msg.toString())  // convert message to json
     console.log("[traffic] RECIEVED:", text);
-    
     if (text["type"] == "connect") {  // use the connect message to assign the client to a board
       bds[-1] = text["board"]
       console.log(`[boards] BOARD ${text["board"]} ADDED TO CLIENT ID ${cts.length-1}`)
+      ws.send(JSON.stringify({"type": "handshake", "id": cts.length-1}))
+      console.log(`[network] HANDSHAKE SENT TO CLIENT ${cts.length-1}`)
     }
 
     current_board = text["board"]
     wss.clients.forEach(client => {
-      if (client.readyState === 1 && bds[cts.indexOf(client)] == current_board) {  // if the client is ready and they have access to the board
-        client.send(msg);  // fwd the message
+      if (bds[cts.indexOf(client)] == current_board && client != ws) {  // if the client is ready and they have access to the board
+        console.log(`[traffic] SENT TO ${cts.indexOf(client)}`)
+        client.send(JSON.stringify(text));  // fwd the message
+      } else if (client == ws) {
+        console.log(`[boards] SUPPRESSED RETURN TO SENDER ${cts.indexOf(client)}`)
       };
     });
   });
