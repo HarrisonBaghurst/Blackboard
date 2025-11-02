@@ -24,12 +24,12 @@ const ToolBar = ({ handleUndo, handleRedo, handleChangeColour, handleSetEraser }
         {
             "label": "Pink Chalk",
             "icon": <Image src={"/icons/chalk-pink.svg"} alt='Chalk' width={0} height={0} className='w-[60%] h-[60%]'/>,
-            "onClick": () => handleChangeColour('hsl(320,42%,79%)'),
+            "onClick": () => handleChangeColour("hsl(320,42%,79%)"),
         },
         {
             "label": "Green Chalk",
             "icon": <Image src={"/icons/chalk-green.svg"} alt='Chalk' width={0} height={0} className='w-[60%] h-[60%]'/>,
-            "onClick": () => handleChangeColour("hsl(108,22%,60)"),
+            "onClick": () => handleChangeColour("hsl(108,22%,60%)"),
         },
         {
             "label": "Board Eraser",

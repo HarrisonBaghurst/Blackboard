@@ -150,14 +150,20 @@ const Board = () => {
     }, [strokes, currentStroke]); 
   
     useEffect(() => {
-      if (recieveblocker) {
-          setRecieveBlocker(false)
-      } else {
-          if (!socket) return;
-          console.log("SENDING", JSON.stringify(strokes))
-          socket.send(JSON.stringify(strokes));
-          setRecieveBlocker(false)
-      };
+        if (recieveblocker) {
+            setRecieveBlocker(false);
+            return;
+        }
+        if (!socket) return;
+        if (socket.readyState === WebSocket.OPEN) {
+            console.log("SENDING", JSON.stringify(strokes))
+            socket.send(JSON.stringify(strokes));
+        }
+        else {
+            console.warn("Socket not ready, state: ", socket.readyState);
+        }
+        setRecieveBlocker(false);
+
     }, [strokes]);
         
     const handleMouseDown = (e: React.MouseEvent) => {
