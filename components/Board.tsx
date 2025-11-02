@@ -38,6 +38,8 @@ const Board = () => {
     const params = useParams();
 
     const pathname = usePathname();
+    
+    const strokesRef = useRef<Stroke[]>([]);
 
     useEffect(() => {
         // set url
@@ -76,31 +78,42 @@ const Board = () => {
 
 
     useEffect(() => {
-        if (socket) {
-            socket.onopen = () => {
-                console.log("[client] SENT CONNECT REQ");
-                const msg = JSON.stringify({"type": "connect", "board": params["slug"]})
-                socket.send(msg);
-            };
+        if (!socket) return;
+        socket.onopen = () => {
+            console.log("[client] SENT CONNECT REQ");
+            const msg = JSON.stringify({"type": "connect", "board": params["slug"]})
+            socket.send(msg);
+        };
+        
+        socket.onmessage = (event: MessageEvent) => {
+            const received = JSON.parse(event.data)
+            if (received['type'] == "handshake") {
+                console.log("[client] RECEIVED HANDSHAKE; ID" + received['id'])
+                setID(received['id'])
+            } else if (received["type"] == "foreign-sync") {
+                received['type'] = "foreign-sync-return"
+                console.log("STROKES", strokes)
+                received['board'] = strokesRef.current
+                socket.send(JSON.stringify(received))
+            } else if (received["type"] == "foreign-sync-return") {
+                console.log("RECEIVED: ", received['board'])
+                setStrokes(received['board'])
+            } 
             
-            socket.onmessage = (event: MessageEvent) => {
-                const received = JSON.parse(event.data)
-                if (received['type'] == "handshake") {
-                    console.log("[client] RECEIVED HANDSHAKE; ID" + received['id'])
-                    setID(received['id'])
-                } else {
-                    if (strokes == JSON.parse(event.data)) return;
-                    console.log("[client] RECIEVED PURGED BOARD")
-                    setRecieveBlocker(true)
-                    setStrokes(JSON.parse(event.data))
-                    console.log("[client] RE-RENDERED");
-                }
-            };
-        }
+            else {
+                if (strokes == JSON.parse(event.data)) return;
+                console.log("[client] RECIEVED PURGED BOARD")
+                setRecieveBlocker(true)
+                setStrokes(JSON.parse(event.data))
+                console.log("[client] UPDATED");
+            }
+        };
     }, [socket]);
     
     // update canvas upon change to strokes array
     useEffect(() => {
+        strokesRef.current = strokes;  // update strokes for sync requests
+
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
