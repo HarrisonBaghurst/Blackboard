@@ -134,10 +134,11 @@ const Board = () => {
                         setStrokes((prev) => [...prev, updated_board]);
                     }   
                 } else {
-                    console.log("STROKESDONE", strokes, strokesRef.current)
+                    console.log("REMOVINGGGGGGGG")
+                    console.log("STROKESDONE", strokes, strokesRef.current, updated_board)
                     if (JSON.stringify(strokesRef.current).includes(JSON.stringify(updated_board))) {
-                        setStrokes(strokes.filter(item => item != updated_board));  // if it's in the most recent version, it should be in the older one
-                        console.log()
+                        setStrokes(strokesRef.current.splice(strokesRef.current.indexOf(updated_board),1));  // if it's in the most recent version, it should be in the older one
+                        console.log("eee", strokes.filter(item => item !== updated_board))
                     } else {
                         console.log("NOT IN, NOT REMOVING")
                     }
@@ -223,14 +224,16 @@ const Board = () => {
             // get the diff
             let diff = null
             let update_type = null
+            console.log(oldstrokes)
             if (strokes.length > oldstrokes.length) {
                 diff = strokes.filter(x => !oldstrokes.includes(x));
                 update_type = "add"
             } else {
-                diff = oldstrokes.filter(x => !strokes.includes(x));
+                diff = strokesRef.current.filter(x => removedStrokes.includes(x));
                 update_type = "del"
+                console.log(removedStrokes)
+                console.log("DIFF DEL: ", diff)
             }
-            console.log("DIFF: ", diff)
             socket.send(JSON.stringify({"type": "update", "update_type": update_type, "diff": diff}));
         }
         else {
@@ -298,6 +301,7 @@ const Board = () => {
             if (currentStroke) {
                 setStrokes((prev) => [...prev, currentStroke]);
             }
+            
             setCurrentStroke(null);
             setRemovedStrokes([]);
         }
@@ -342,8 +346,13 @@ const Board = () => {
             });
             return updated;
         });
+        setRemovedStrokes((prevStrokes) => {
+            const updated = prevStrokes.filter(stroke => {
+                return stroke.points.some(p => hypo(point.x, point.y, p.x, p.y) < 20);
+            });
+            return [...prevStrokes, ...updated];
+        });
 
-        setRemovedStrokes([]);
     }
 
     const handleScreenshot = async () => {
