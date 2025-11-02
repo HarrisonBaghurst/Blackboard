@@ -4,6 +4,14 @@ import React, { useEffect, useRef, useState } from 'react'
 import ToolBar from './ToolBar';
 import { useParams, usePathname } from 'next/navigation';
 import hypo from '@/lib/numUtils';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 type Point = {
     x: number;
@@ -15,7 +23,7 @@ type Stroke = {
     colour: string;
 }
 
-type Tool = 'chalk' | 'eraser';
+type Tool = 'chalk' | 'eraser' | 'select';
 
 const Board = () => {
     // persistant reference to canvas 
@@ -28,6 +36,14 @@ const Board = () => {
     const [currentColour, setCurrentColour] = useState('hsl(44,53%,74%)');
     const [id, setID] = useState<number | null>(null);
     const [recieveblocker, setRecieveBlocker] = useState(false)
+
+    const [loadingAPI, setLoadingAPI] = useState(false);
+    const [latexResult, setLatexResult] = useState('');
+    const [openDialog, setOpenDialog] = useState(false);
+
+    const [selectionStart, setSelectionStart] = useState<Point | null>(null);
+    const [selectionEnd, setSelectionEnd] = useState<Point | null>(null);
+    const [isSelecting, setIsSelecting] = useState(false);
 
     const [removedStrokes, setRemovedStrokes] = useState<Stroke[]>([]);
 
@@ -110,7 +126,6 @@ const Board = () => {
         };
     }, [socket]);
     
-    // update canvas upon change to strokes array
     useEffect(() => {
         strokesRef.current = strokes;  // update strokes for sync requests
 
@@ -119,57 +134,86 @@ const Board = () => {
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height) 
+        // clear
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.lineWidth = 3;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
 
-        let allStrokes;
-        if (currentStroke) {
-            allStrokes = [...strokes, currentStroke];
-        }
-        else {
-            allStrokes = strokes
-        }
+        // combine strokes and current stroke
+        const allStrokes = currentStroke ? [...strokes, currentStroke] : strokes;
 
+        // draw all strokes
         for (const stroke of allStrokes) {
+            if (stroke.points.length < 2) continue;
             ctx.beginPath();
             ctx.strokeStyle = stroke.colour;
-            if (stroke.points.length < 2) return;
-
             ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
 
             for (let i = 1; i < stroke.points.length - 2; i++) {
-            const xc = (stroke.points[i].x + stroke.points[i + 1].x) / 2;
-            const yc = (stroke.points[i].y + stroke.points[i + 1].y) / 2;
-            ctx.quadraticCurveTo(stroke.points[i].x, stroke.points[i].y, xc, yc);
+                const xc = (stroke.points[i].x + stroke.points[i + 1].x) / 2;
+                const yc = (stroke.points[i].y + stroke.points[i + 1].y) / 2;
+                ctx.quadraticCurveTo(stroke.points[i].x, stroke.points[i].y, xc, yc);
             }
 
-            // connect the last two points
             const last = stroke.points.length - 1;
             ctx.quadraticCurveTo(
-            stroke.points[last - 1].x,
-            stroke.points[last - 1].y,
-            stroke.points[last].x,
-            stroke.points[last].y
+                stroke.points[last - 1].x,
+                stroke.points[last - 1].y,
+                stroke.points[last].x,
+                stroke.points[last].y
             );
             ctx.stroke();
         }
 
-    }, [strokes, currentStroke]); 
+        // draw selection rectangle if active
+        if (isSelecting && selectionStart && selectionEnd) {
+            const x = Math.min(selectionStart.x, selectionEnd.x);
+            const y = Math.min(selectionStart.y, selectionEnd.y);
+            const w = Math.abs(selectionStart.x - selectionEnd.x);
+            const h = Math.abs(selectionStart.y - selectionEnd.y);
+
+            ctx.save();
+            ctx.strokeStyle = 'rgba(0, 128, 255, 0.9)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([6]);
+            ctx.strokeRect(x, y, w, h);
+            
+            // optional semi-transparent fill for better UX
+            ctx.fillStyle = 'rgba(0, 128, 255, 0.15)';
+            ctx.fillRect(x, y, w, h);
+            ctx.restore();
+        }
+    }, [strokes, currentStroke, isSelecting, selectionStart, selectionEnd]);
+
   
     useEffect(() => {
-      if (recieveblocker) {
-          setRecieveBlocker(false)
-      } else {
-          if (!socket) return;
-          console.log("SENDING", JSON.stringify(strokes))
-          socket.send(JSON.stringify(strokes));
-          setRecieveBlocker(false)
-      };
+        if (recieveblocker) {
+            setRecieveBlocker(false);
+            return;
+        }
+        if (!socket) return;
+        if (socket.readyState === WebSocket.OPEN) {
+            console.log("SENDING", JSON.stringify(strokes))
+            socket.send(JSON.stringify(strokes));
+        }
+        else {
+            console.warn("Socket not ready, state: ", socket.readyState);
+        }
+        setRecieveBlocker(false);
+
     }, [strokes]);
         
     const handleMouseDown = (e: React.MouseEvent) => {
+        if (tool === 'select') {
+            const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
+            const start = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            setSelectionStart(start);
+            setSelectionEnd(start);
+            setIsSelecting(true);
+            return
+        }
+
         setIsToolDown(true);
         if (tool === 'chalk') {
             const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
@@ -182,6 +226,13 @@ const Board = () => {
     }
 
     const handleMouseMove = (e: React.MouseEvent) => {
+        if (tool === 'select' && isSelecting) {
+            const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
+            const end = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+            setSelectionEnd(end);
+            return;
+        }
+        
         if (!isToolDown) return; 
         if (tool === 'chalk') {
             const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
@@ -197,6 +248,13 @@ const Board = () => {
     }
 
     const handleMouseUp = () => { 
+        if (tool === 'select' && isSelecting) {
+            setIsSelecting(false);
+            handleSelectionComplete();
+            setTool('chalk'); 
+            return;
+        }
+
         if (!isToolDown) return; 
         setIsToolDown(false);    
         if (tool === 'chalk') {
@@ -251,9 +309,53 @@ const Board = () => {
         setRemovedStrokes([]);
     }
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(fullUrl);
-    }
+    const handleScreenshot = async () => {
+        if (loadingAPI) return;
+        setTool('select');
+        setLoadingAPI(true);
+        setSelectionStart(null);
+        setSelectionEnd(null);
+    };
+
+    const handleSelectionComplete = async () => {
+        if (!selectionStart || !selectionEnd || !canvasRef.current) return;
+        const canvas = canvasRef.current;
+
+        const x = Math.min(selectionStart.x, selectionEnd.x);
+        const y = Math.min(selectionStart.y, selectionEnd.y);
+        const width = Math.abs(selectionStart.x - selectionEnd.x);
+        const height = Math.abs(selectionStart.y - selectionEnd.y);
+
+        const cropped = document.createElement('canvas');
+        cropped.width = width;
+        cropped.height = height;
+        const ctx = cropped.getContext('2d');
+        if (!ctx) return;
+        ctx.drawImage(canvas, x, y, width, height, 0, 0, width, height);
+
+        const blob = await new Promise<Blob | null>((resolve) =>
+            cropped.toBlob(resolve, 'image/png')
+        );
+        if (!blob) return;
+
+        const formData = new FormData();
+        formData.append('image', blob, 'selection.png');
+
+        try {
+            const res = await fetch('/api/latex', {
+            method: 'POST',
+            body: formData,
+            });
+            const text = await res.text();
+            setLatexResult(text);
+            setOpenDialog(true);
+        } catch (err) {
+            console.error('[Selection Upload Error]:', err);
+        } finally {
+            setLoadingAPI(false);
+            setTool('chalk'); 
+        }
+    };
 
     return (
         <div className='graph-paper'>
@@ -262,16 +364,30 @@ const Board = () => {
             handleUndo={handleUndo}
             handleChangeColour={handleChangeColour}
             handleSetEraser={handleSetEraser}
-            handleCopy={handleCopy}
+            handleScreenshot={handleScreenshot}
+            loadingAPI={loadingAPI}
             />
             <canvas 
             ref={canvasRef}        
-            className='w-full h-full'
+            className='w-screen h-screen'
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
             />
+            <Dialog open={openDialog} onOpenChange={() => setOpenDialog(!openDialog)}>
+                <DialogContent>
+                    <DialogHeader className='p-4 flex flex-col gap-6'>
+                        <DialogTitle className='text-2xl font-bold flex flex-col'>
+                            LaTeX Translation Complete
+                            <span className='text-sm text-foreground-second'>Your hand written equations - ready to copy.</span>
+                        </DialogTitle>
+                        <DialogDescription className='text-foreground text-lg bg-background p-4 rounded-(--rounding-small)'>
+                            {latexResult}
+                        </DialogDescription>
+                    </DialogHeader>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
