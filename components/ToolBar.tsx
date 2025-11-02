@@ -9,13 +9,15 @@ type ToolBarProps = {
     handleRedo: () => void;
     handleChangeColour: (colour: string) => void;
     handleSetEraser: () => void;
+    handleScreenshot: () => void;
+    loadingAPI: boolean;
 }
 
-const ToolBar = ({ handleUndo, handleRedo, handleChangeColour, handleSetEraser }: ToolBarProps) => {
+const ToolBar = ({ handleUndo, handleRedo, handleChangeColour, handleSetEraser, handleScreenshot, loadingAPI }: ToolBarProps) => {
     const selectors = [
         {
             "label": "White Chalk",
-            "icon": <Image src={"/icons/chalk-white.svg"} alt='Chalk' width={0} height={0} className='w-[60%] h-[60%]'/>,
+            "icon": <Image src={"/icons/chalk-white.svg"} alt='Chalk' width={0} height={0} className='w-[60%] h-[60%]' loading='eager'/>,
             "onClick": () => handleChangeColour("hsl(44,53%,74%)"),
         },
         {
@@ -42,13 +44,20 @@ const ToolBar = ({ handleUndo, handleRedo, handleChangeColour, handleSetEraser }
             "label": "Undo",
             "icon": <Image src={"/icons/undo.svg"} alt='Chalk' width={0} height={0} className='w-[60%] h-[60%]'/>,
             "onClick": () => handleUndo(),
-        }
-        ,
+        },
         {
             "label": "Redo",
             "icon": <Image src={"/icons/redo.svg"} alt='Chalk' width={0} height={0} className='w-[60%] h-[60%]'/>,
             "onClick": () => handleRedo(),
+        },
+        {
+            "label": "Convert to LaTeX",
+            "icon": loadingAPI? 
+                <Image src={"/icons/loading-arrow.svg"} alt='Chalk' width={0} height={0} className='w-[60%] h-[60%] animate-spin'/> :
+                <Image src={"/icons/screenshot.svg"} alt='Chalk' width={0} height={0} className='w-[60%] h-[60%]'/>,
+            "onClick": () => handleScreenshot(),
         }
+
     ]
 
     return (

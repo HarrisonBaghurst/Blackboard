@@ -29,6 +29,8 @@ const Board = () => {
     const [id, setID] = useState<number | null>(null);
     const [recieveblocker, setRecieveBlocker] = useState(false)
 
+    const [loadingAPI, setLoadingAPI] = useState(false);
+
     const [removedStrokes, setRemovedStrokes] = useState<Stroke[]>([]);
 
     const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -248,6 +250,36 @@ const Board = () => {
         setRemovedStrokes([]);
     }
 
+    const handleScreenshot = async () => {
+        if (loadingAPI) return;
+        setLoadingAPI(true);
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const blob = await new Promise<Blob | null>((resolve) =>
+            canvas.toBlob(resolve, "image/png")
+        );
+        if (!blob) return;
+
+        const formData = new FormData();
+        formData.append("image", blob, "board.png");
+
+        try {
+            const res = await fetch("/api/latex", {
+                method: "POST",
+                body: formData,
+            });
+
+            const text = await res.text();
+            console.log("[API Response]:", text);
+            setLoadingAPI(false);
+        } catch (err) {
+            console.error("[Screenshot Upload Error]:", err);
+            setLoadingAPI(false)
+        }
+    };
+
     return (
         <div className='graph-paper'>
             <ToolBar 
@@ -255,6 +287,8 @@ const Board = () => {
             handleUndo={handleUndo}
             handleChangeColour={handleChangeColour}
             handleSetEraser={handleSetEraser}
+            handleScreenshot={handleScreenshot}
+            loadingAPI={loadingAPI}
             />
             <canvas 
             ref={canvasRef}        
