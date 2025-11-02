@@ -4,6 +4,14 @@ import React, { useEffect, useRef, useState } from 'react'
 import ToolBar from './ToolBar';
 import { useParams, usePathname } from 'next/navigation';
 import hypo from '@/lib/numUtils';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 type Point = {
     x: number;
@@ -30,6 +38,8 @@ const Board = () => {
     const [recieveblocker, setRecieveBlocker] = useState(false)
 
     const [loadingAPI, setLoadingAPI] = useState(false);
+    const [latexResult, setLatexResult] = useState('');
+    const [openDialog, setOpenDialog] = useState(false);
 
     const [removedStrokes, setRemovedStrokes] = useState<Stroke[]>([]);
 
@@ -274,6 +284,8 @@ const Board = () => {
             const text = await res.text();
             console.log("[API Response]:", text);
             setLoadingAPI(false);
+            setLatexResult(text);
+            setOpenDialog(true);
         } catch (err) {
             console.error("[Screenshot Upload Error]:", err);
             setLoadingAPI(false)
@@ -298,6 +310,16 @@ const Board = () => {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
             />
+            <Dialog open={openDialog} onOpenChange={() => setOpenDialog(!openDialog)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className='text-2xl font-bold'>Your LaTeX result:</DialogTitle>
+                        <DialogDescription className='text-foreground text-xl'>
+                            {latexResult}
+                        </DialogDescription>
+                    </DialogHeader>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }
