@@ -1,12 +1,13 @@
-import { Stroke } from "@/types/strokeTypes";
+import { Point, Stroke } from "@/types/strokeTypes";
 
 type DrawToCanavsParameters = {
     strokes: Stroke[],
     currentStroke: Stroke | null,
     canvasRef: React.RefObject<HTMLCanvasElement | null>
+    panOffset: Point | null;
 }
 
-const drawToCanvas = ({ strokes, currentStroke, canvasRef }: DrawToCanavsParameters) => {
+const drawToCanvas = ({ strokes, currentStroke, canvasRef, panOffset }: DrawToCanavsParameters) => {
     
     // get current canvas and context
     const canvas = canvasRef.current;
@@ -32,8 +33,17 @@ const drawToCanvas = ({ strokes, currentStroke, canvasRef }: DrawToCanavsParamet
     // combine strokes and current stroke
     const allStrokes = currentStroke ? [...strokes, currentStroke] : strokes;
 
+    // add panning offset 
+    const pannedStrokes = panOffset ? allStrokes.map(stroke => ({
+        ...stroke,
+        points: stroke.points.map(p => ({
+            x: p.x + panOffset.x,
+            y: p.y + panOffset.y,
+        }))
+    })) : allStrokes;
+
     // draw all strokes
-    for (const stroke of allStrokes) {
+    for (const stroke of pannedStrokes) {
         if (stroke.points.length < 2) continue;
         ctx.beginPath();
         ctx.strokeStyle = stroke.colour;

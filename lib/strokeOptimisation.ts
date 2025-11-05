@@ -1,4 +1,4 @@
-export type Point = { x: number; y: number };
+import { Point } from "@/types/strokeTypes";
 
 /**
  * Simplify a polyline using the Ramer–Douglas–Peucker algorithm.
