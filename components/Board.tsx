@@ -30,6 +30,7 @@ const Board = () => {
         <canvas 
         ref={canvasRef}
         className='w-screen h-screen graph-paper'
+        style={{ backgroundPosition: `${panOffset.x}px ${panOffset.y}px` }}
         onMouseDown={(e) => handleMouseDown({ e, currentColour, setCurrentStroke, setIsToolDown, setPanStartPoint, lastPanOffset })}
         onMouseMove={(e) => handleMouseMove({ e, setCurrentStroke, isToolDown, panStartPoint, setPanOffset, lastPanOffset, panOffset })}
         onMouseUp={(e) => handleMouseUp({ e, isToolDown, setIsToolDown, currentStroke, setCurrentStroke, setStrokes, setPanStartPoint, setLastPanOffset, panOffset })}
