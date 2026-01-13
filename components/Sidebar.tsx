@@ -5,13 +5,13 @@ import { motion } from 'framer-motion';
 import Image from "next/image";
 
 const Sidebar = () => {
-    const tools: string[] = [
-        '/icons/pencil.svg',
-        '',
-        '',
-        '',
-        '',
-        ''
+    const tools: ([string, number])[] = [
+        ['/icons/pencil.svg', 90],
+        ['/icons/crayon.svg', 270],
+        ['', 0],
+        ['', 0],
+        ['', 0],
+        ['', 0]
     ];
 
     const [currentTool, setCurrentTool] = useState<number>(0);
@@ -34,14 +34,14 @@ const Sidebar = () => {
                         damping: 25,
                     }}
                 >
-                    {tool !== '' ?
+                    {tool[0] !== '' ?
                         (
                             <Image
-                                src={tool}
+                                src={tool[0]}
                                 width={0}
                                 height={0}
                                 alt="this"
-                                className="w-full h-full rotate-90 scale-250"
+                                className={`w-full h-full rotate-${tool[1]} scale-270`}
                             />
                         ) : (<></>)
                     }
