@@ -7,9 +7,17 @@
 }
 
 :root {
-  --background: hsl(0,1%,14%);
-  --foreground: hsl(0,0,92%);
-  --foreground-second: hsl(0,0,60%);
+  --background: hsl(0, 1%, 14%);
+  --foreground: hsl(0, 0, 92%);
+  --foreground-second: hsl(0, 0, 60%);
+
+  --card-background: hsl(0, 0, 22%);
+  --card-shadow: hsl(0, 0, 12%);
+  --card-child-background: hsl(0, 0, 28%);
+  --card-child-shadow: hsl(0, 0, 20%);
+
+  --border-radius: 1rem;
+  --border-radius-small: 0.5rem;
 }
 
 @theme inline {
@@ -18,6 +26,8 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-foreground-second: var(--foreground-second);
+
+  --color-card-background: var(--card-background);
 }
 
 @layer utilities {
@@ -28,11 +38,28 @@
 
       linear-gradient(to right, rgba(255, 255, 255, 0.075) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.075) 1px, transparent 1px);
-    background-size: 
+    background-size:
       10px 10px,
       10px 10px,
-      50px 50px, 
+      50px 50px,
       50px 50px;
+  }
+
+  .card-style {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: 0 0 5px 5px var(--card-shadow);
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .card-style div {
+    background-color: var(--card-child-background);
+    border-radius: var(--border-radius-small);
+    padding: 0.5rem;
+    box-shadow: 0 0 1px 1px var(--card-child-shadow);
   }
 }
 
