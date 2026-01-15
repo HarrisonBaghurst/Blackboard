@@ -18,6 +18,8 @@
 
   --border-radius: 1rem;
   --border-radius-small: 0.5rem;
+
+  --padding: 0.5rem;
 }
 
 @theme inline {
@@ -49,16 +51,11 @@
     background-color: var(--card-background);
     border-radius: var(--border-radius);
     box-shadow: 0 0 5px 5px var(--card-shadow);
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
   }
 
-  .card-style div {
+  .card-style>div {
     background-color: var(--card-child-background);
     border-radius: var(--border-radius-small);
-    padding: 0.5rem;
     box-shadow: 0 0 1px 1px var(--card-child-shadow);
   }
 }
