@@ -116,7 +116,7 @@ export const handleMouseUp = ({
     if (e.button === 0 && isDrawingRef.current) {
         isDrawingRef.current = false;
         if (currentStrokeRef.current) {
-            const simplified = simplifyRDP(currentStrokeRef.current.points, 2.5);
+            const simplified = simplifyRDP(currentStrokeRef.current.points, 1);
             strokesRef.current.push({
                 points: simplified,
                 colour: currentStrokeRef.current.colour,

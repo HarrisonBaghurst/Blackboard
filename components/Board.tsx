@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import drawToCanvas from '@/lib/canvasDrawing';
 import { handleMouseDown, handleMouseMove, handleMouseUp, handleUndo } from '@/lib/canvasInputs';
 import { Point, Stroke } from '@/types/strokeTypes';
-import { useCurrentColourRef } from '@/contexts/ToolContext';
+import Sidebar from './Sidebar';
 
 const Board = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -16,7 +16,7 @@ const Board = () => {
     const lastPanOffsetRef = useRef<Point>({ x: 0, y: 0 });
     const panStartRef = useRef<Point | null>(null);
     const isDrawingRef = useRef(false);
-    const currentColourRef = useCurrentColourRef();
+    const currentColourRef = useRef('#ffffff');
 
     // animation loop - decoupled from React lifecycle
     useEffect(() => {
@@ -61,41 +61,47 @@ const Board = () => {
     })
 
     return (
-        <canvas
-            ref={canvasRef}
-            className="w-screen h-screen graph-paper"
-            onMouseDown={(e) =>
-                handleMouseDown({
-                    e,
-                    currentColourRef,
-                    currentStrokeRef,
-                    isDrawingRef,
-                    panStartRef,
-                    lastPanOffsetRef,
-                })
-            }
-            onMouseMove={(e) =>
-                handleMouseMove({
-                    e,
-                    currentStrokeRef,
-                    isDrawingRef,
-                    panStartRef,
-                    panOffsetRef,
-                    lastPanOffsetRef,
-                })
-            }
-            onMouseUp={(e) =>
-                handleMouseUp({
-                    e,
-                    isDrawingRef,
-                    currentStrokeRef,
-                    strokesRef,
-                    panStartRef,
-                    lastPanOffsetRef,
-                    panOffsetRef,
-                })
-            }
-        />
+        <>
+            <Sidebar
+                currentColourRef={currentColourRef}
+                strokesRef={strokesRef}
+            />
+            <canvas
+                ref={canvasRef}
+                className="w-screen h-screen graph-paper"
+                onMouseDown={(e) =>
+                    handleMouseDown({
+                        e,
+                        currentColourRef,
+                        currentStrokeRef,
+                        isDrawingRef,
+                        panStartRef,
+                        lastPanOffsetRef,
+                    })
+                }
+                onMouseMove={(e) =>
+                    handleMouseMove({
+                        e,
+                        currentStrokeRef,
+                        isDrawingRef,
+                        panStartRef,
+                        panOffsetRef,
+                        lastPanOffsetRef,
+                    })
+                }
+                onMouseUp={(e) =>
+                    handleMouseUp({
+                        e,
+                        isDrawingRef,
+                        currentStrokeRef,
+                        strokesRef,
+                        panStartRef,
+                        lastPanOffsetRef,
+                        panOffsetRef,
+                    })
+                }
+            />
+        </>
     );
 };
 

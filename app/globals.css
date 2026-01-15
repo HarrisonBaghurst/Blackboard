@@ -16,10 +16,14 @@
   --card-child-background: hsl(0, 0, 28%);
   --card-child-shadow: hsl(0, 0, 20%);
 
-  --border-radius: 1rem;
-  --border-radius-small: 0.5rem;
+  --arrow-color: #7f7f7fff;
+
+  --border-radius: 1.75rem;
+  --border-radius-small: 1.25rem;
 
   --padding: 0.5rem;
+
+  --gap: 1rem;
 }
 
 @theme inline {

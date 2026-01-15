@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { CurrentColourProvider } from "@/contexts/ToolContext";
 
 export const metadata: Metadata = {
   title: "Blackboard",
@@ -17,9 +16,7 @@ export default function RootLayout({
       <body
         className={`antialiased`}
       >
-        <CurrentColourProvider>
-          {children}
-        </CurrentColourProvider>
+        {children}
       </body>
     </html>
   );
