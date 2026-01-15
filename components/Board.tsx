@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import drawToCanvas from '@/lib/canvasDrawing';
 import { handleMouseDown, handleMouseMove, handleMouseUp, handleUndo } from '@/lib/canvasInputs';
 import { Point, Stroke } from '@/types/strokeTypes';
+import { useCurrentColourRef } from '@/contexts/ToolContext';
 
 const Board = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -15,7 +16,7 @@ const Board = () => {
     const lastPanOffsetRef = useRef<Point>({ x: 0, y: 0 });
     const panStartRef = useRef<Point | null>(null);
     const isDrawingRef = useRef(false);
-    const currentColourRef = useRef('#ffffff');
+    const currentColourRef = useCurrentColourRef();
 
     // animation loop - decoupled from React lifecycle
     useEffect(() => {

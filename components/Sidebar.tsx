@@ -3,14 +3,17 @@
 import { useState } from "react";
 import { motion } from 'framer-motion';
 import Image from "next/image";
+import { useCurrentColourRef } from "@/contexts/ToolContext";
 
 const Sidebar = () => {
-    const tools: ([string, number])[] = [
-        ['/icons/pencil.svg', 90],
-        ['/icons/crayon.svg', 270]
+    const tools: ([string, number, string])[] = [
+        ['/icons/pencil.svg', 90, '#ffffff'],
+        ['/icons/crayon.svg', 270, '#edd973']
     ];
 
     const [currentTool, setCurrentTool] = useState<number>(0);
+
+    const currentColourRef = useCurrentColourRef();
 
     return (
         <div
@@ -19,7 +22,10 @@ const Sidebar = () => {
             {tools.map((tool, index) => (
                 <motion.div
                     key={index}
-                    onClick={() => setCurrentTool(index)}
+                    onClick={() => {
+                        setCurrentTool(index);
+                        currentColourRef.current = tool[2];
+                    }}
                     className="h-15 w-35 cursor-pointer origin-right overflow-hidden"
                     animate={{
                         scaleX: currentTool === index ? 1.25 : 1
