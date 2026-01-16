@@ -20,6 +20,7 @@ const Sidebar = ({ currentColourRef, strokesRef, undoneStrokesRef }: SidebarProp
     ];
 
     const [currentTool, setCurrentTool] = useState<number>(0);
+    const [hoveredTool, setHoveredTool] = useState<number | null>(null);
 
     return (
         <div className="fixed right-(--gap) top-1/2 -translate-y-1/2 flex flex-col gap-(--gap)">
@@ -38,13 +39,15 @@ const Sidebar = ({ currentColourRef, strokesRef, undoneStrokesRef }: SidebarProp
                         }}
                         className="h-15 w-[110px] relative cursor-pointer overflow-hidden p-(--padding)"
                         animate={{
-                            width: currentTool === index ? 145 : 110
+                            width: currentTool === index ? 145 : hoveredTool === index ? 125 : 110
                         }}
                         transition={{
                             type: 'spring',
                             stiffness: 300,
                             damping: 25,
                         }}
+                        onHoverStart={() => setHoveredTool(index)}
+                        onHoverEnd={() => setHoveredTool(null)}
                     >
                         <div className="absolute top-1/2 -translate-y-1/2 left-0 w-[145px] h-15">
                             <Image
