@@ -55,3 +55,5 @@ const drawToCanvas = ({ strokes, currentStroke, canvasRef, panOffset }: DrawToCa
 };
 
 export default drawToCanvas;
+
+

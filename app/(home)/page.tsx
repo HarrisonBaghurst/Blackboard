@@ -1,8 +1,11 @@
 import Board from '@/components/Board'
+import { Room } from './Room'
 
 const page = () => {
     return (
-        <Board />
+        <Room>
+            <Board />
+        </Room>
     )
 }
 

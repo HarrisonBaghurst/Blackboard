@@ -5,6 +5,8 @@ import drawToCanvas from '@/lib/canvasDrawing';
 import { handleMouseDown, handleMouseMove, handleMouseUp, handleUndo } from '@/lib/canvasInputs';
 import { Point, Stroke } from '@/types/strokeTypes';
 import Sidebar from './Sidebar';
+import { useMyPresence, useOthers } from '@liveblocks/react';
+import Cursor from './Cursor'
 
 const Board = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -18,6 +20,23 @@ const Board = () => {
     const panStartRef = useRef<Point | null>(null);
     const isDrawingRef = useRef(false);
     const currentColourRef = useRef('#ffffff');
+
+    // liveblocks presence - cursor
+    const others = useOthers();
+    const [myPresence, updateMyPresence] = useMyPresence();
+
+    // handle pointer movement 
+    const handlePresenceUpdate = (e: React.MouseEvent) => {
+        updateMyPresence({
+            cursor: {
+                x: Math.round(e.clientX),
+                y: Math.round(e.clientY)
+            }
+        });
+    }
+    const handlePointerLeave = (e: React.MouseEvent) => {
+        updateMyPresence({ cursor: null })
+    }
 
     // animation loop - decoupled from React lifecycle
     useEffect(() => {
@@ -68,6 +87,17 @@ const Board = () => {
                 strokesRef={strokesRef}
                 undoneStrokesRef={undoneStrokesRef}
             />
+            {others.map(({ connectionId, presence }) => {
+                if (!presence?.cursor) return null;
+                return (
+                    <Cursor
+                        key={connectionId}
+                        x={presence.cursor.x}
+                        y={presence.cursor.y}
+                        color="#3b82f6"
+                    />
+                );
+            })}
             <canvas
                 ref={canvasRef}
                 className="w-screen h-screen graph-paper"
@@ -81,7 +111,7 @@ const Board = () => {
                         lastPanOffsetRef,
                     })
                 }
-                onMouseMove={(e) =>
+                onMouseMove={(e) => {
                     handleMouseMove({
                         e,
                         currentStrokeRef,
@@ -89,8 +119,9 @@ const Board = () => {
                         panStartRef,
                         panOffsetRef,
                         lastPanOffsetRef,
-                    })
-                }
+                    });
+                    handlePresenceUpdate(e)
+                }}
                 onMouseUp={(e) =>
                     handleMouseUp({
                         e,
@@ -102,6 +133,7 @@ const Board = () => {
                         panOffsetRef,
                     })
                 }
+                onMouseLeave={handlePointerLeave}
             />
         </>
     );
