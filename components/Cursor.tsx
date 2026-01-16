@@ -5,9 +5,10 @@ export default function Cursor({ x, y, color }: { x: number; y: number; color: s
                 position: "absolute",
                 left: 0,
                 top: 0,
-                transform: `translateX(${x}px) translateY(${y}px)`,
-                transition: "transform 0.1s transform-timing-function: linear",
+                transform: `translate(${x}px, ${y}px)`,
+                transition: "transform 300ms ease-out",
                 pointerEvents: "none",
+                willChange: "transform",
             }}
             width="24"
             height="36"

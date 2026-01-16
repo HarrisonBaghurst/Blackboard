@@ -23,14 +23,14 @@ const Board = () => {
 
     // liveblocks presence - cursor
     const others = useOthers();
-    const [myPresence, updateMyPresence] = useMyPresence();
+    const [_, updateMyPresence] = useMyPresence();
 
     // handle pointer movement 
     const handlePresenceUpdate = (e: React.MouseEvent) => {
         updateMyPresence({
             cursor: {
-                x: Math.round(e.clientX),
-                y: Math.round(e.clientY)
+                x: Math.round(e.clientX - panOffsetRef.current.x),
+                y: Math.round(e.clientY - panOffsetRef.current.y)
             }
         });
     }
