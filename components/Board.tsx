@@ -2,26 +2,35 @@
 
 import { useEffect, useRef } from 'react';
 import drawToCanvas from '@/lib/canvasDrawing';
-import { handleMouseDown, handleMouseMove, handleMouseUp, handleUndo } from '@/lib/canvasInputs';
+import { handleMouseDown, handleMouseMove, handleMouseUp } from '@/lib/canvasInputs';
 import { Point, Stroke } from '@/types/strokeTypes';
 import Sidebar from './Sidebar';
-import { useMyPresence, useOthers } from '@liveblocks/react';
+import { useHistory, useMutation, useMyPresence, useOthers, useStorage } from '@liveblocks/react';
 import Cursor from './Cursor'
 
 const Board = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    // refs for mutable data
-    const strokesRef = useRef<Stroke[]>([]);
-    const undoneStrokesRef = useRef<Stroke[]>([]);
-    const currentStrokeRef = useRef<Stroke | null>(null);
+    // liveblocks storage - sync accross clients 
+    const strokes = useStorage((root) => root.canvasStrokes);
+    const { undo, redo } = useHistory();
+
+    // use mutations to updated liveblocks storage 
+    const addStroke = useMutation(({ storage }, stroke: Stroke) => {
+        storage.get('canvasStrokes').push(stroke);
+    }, [])
+
+    // panning control 
     const panOffsetRef = useRef<Point>({ x: 0, y: 0 });
     const lastPanOffsetRef = useRef<Point>({ x: 0, y: 0 });
     const panStartRef = useRef<Point | null>(null);
+
+    // in progress stroke 
+    const currentStrokeRef = useRef<Stroke | null>(null);
     const isDrawingRef = useRef(false);
     const currentColourRef = useRef('#ffffff');
 
-    // liveblocks presence - cursor
+    // live cursor control - all clients 
     const others = useOthers();
     const [_, updateMyPresence] = useMyPresence();
 
@@ -34,9 +43,6 @@ const Board = () => {
             }
         });
     }
-    const handlePointerLeave = (e: React.MouseEvent) => {
-        updateMyPresence({ cursor: null })
-    }
 
     // animation loop - decoupled from React lifecycle
     useEffect(() => {
@@ -45,19 +51,22 @@ const Board = () => {
 
         const render = () => {
             drawToCanvas({
-                strokes: strokesRef.current,
+                strokes: strokes || [],
                 currentStroke: currentStrokeRef.current,
                 canvasRef,
                 panOffset: panOffsetRef.current,
             });
 
-            const { x, y } = panOffsetRef.current;
-            canvas.style.backgroundPosition = `${x}px ${y}px`;
+            if (canvasRef.current) {
+                const { x, y } = panOffsetRef.current;
+                canvas.style.backgroundPosition = `${x}px ${y}px`;
+            }
 
             requestAnimationFrame(render);
         };
-        requestAnimationFrame(render);
-    }, []);
+        const frameId = requestAnimationFrame(render);
+        return () => cancelAnimationFrame(frameId);
+    }, [strokes]); // re-run if strokes changes
 
     // prevent context menu when right-clicking to pan
     useEffect(() => {
@@ -73,12 +82,16 @@ const Board = () => {
         const onKeypress = (event: KeyboardEvent) => {
             if (event.ctrlKey && event.key === 'z') {
                 event.preventDefault();
-                handleUndo({ strokesRef, undoneStrokesRef });
+                undo();
+            }
+            else if (event.ctrlKey && event.key === 'y') {
+                event.preventDefault();
+                redo();
             }
         }
         document.addEventListener('keydown', onKeypress);
         return () => document.removeEventListener('keydown', onKeypress);
-    })
+    });
 
     return (
         <>
@@ -89,15 +102,11 @@ const Board = () => {
                         key={connectionId}
                         x={presence.cursor.x}
                         y={presence.cursor.y}
-                        color="#3b82f6"
+                        color="#eb7a38"
                     />
                 );
             })}
-            <Sidebar
-                currentColourRef={currentColourRef}
-                strokesRef={strokesRef}
-                undoneStrokesRef={undoneStrokesRef}
-            />
+            <Sidebar currentColourRef={currentColourRef} />
             <canvas
                 ref={canvasRef}
                 className="w-screen h-screen graph-paper"
@@ -127,13 +136,12 @@ const Board = () => {
                         e,
                         isDrawingRef,
                         currentStrokeRef,
-                        strokesRef,
                         panStartRef,
                         lastPanOffsetRef,
                         panOffsetRef,
+                        onStrokeFinished: addStroke,
                     })
                 }
-                onMouseLeave={handlePointerLeave}
             />
         </>
     );

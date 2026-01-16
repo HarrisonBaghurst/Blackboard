@@ -1,7 +1,7 @@
 import { Point, Stroke } from '@/types/strokeTypes';
 
 type DrawToCanvasParameters = {
-    strokes: Stroke[];
+    strokes: readonly Stroke[];
     currentStroke: Stroke | null;
     canvasRef: React.RefObject<HTMLCanvasElement | null>;
     panOffset: Point;

@@ -4,16 +4,14 @@ import { RefObject, useState } from "react";
 import { motion } from 'framer-motion';
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { handleRedo, handleUndo } from "@/lib/canvasInputs";
 import { Stroke } from '@/types/strokeTypes';
+import { useHistory } from "@liveblocks/react";
 
 type SidebarProps = {
     currentColourRef: RefObject<string>;
-    strokesRef: RefObject<Stroke[]>;
-    undoneStrokesRef: RefObject<Stroke[]>;
 }
 
-const Sidebar = ({ currentColourRef, strokesRef, undoneStrokesRef }: SidebarProps) => {
+const Sidebar = ({ currentColourRef }: SidebarProps) => {
     const tools: ([string, number, string])[] = [
         ['/icons/pencil.svg', 90, '#ffffff'],
         ['/icons/crayon.svg', 270, '#edd973']
@@ -21,6 +19,8 @@ const Sidebar = ({ currentColourRef, strokesRef, undoneStrokesRef }: SidebarProp
 
     const [currentTool, setCurrentTool] = useState<number>(0);
     const [hoveredTool, setHoveredTool] = useState<number | null>(null);
+
+    const { undo, redo } = useHistory();
 
     return (
         <div className="fixed right-(--gap) top-1/2 -translate-y-1/2 flex flex-col gap-(--gap)">
@@ -66,7 +66,7 @@ const Sidebar = ({ currentColourRef, strokesRef, undoneStrokesRef }: SidebarProp
                 <div className="flex justify-center w-full mt-(--padding) items-center">
                     <button
                         className="w-12 h-12 cursor-pointer flex justify-center items-center"
-                        onClick={() => handleUndo({ strokesRef, undoneStrokesRef })}
+                        onClick={() => undo()}
                     >
                         <Image
                             src={'/icons/undo.svg'}
@@ -79,7 +79,7 @@ const Sidebar = ({ currentColourRef, strokesRef, undoneStrokesRef }: SidebarProp
                     <div className="h-8 w-0.75 rounded-full bg-(--arrow-color)" />
                     <button
                         className="w-12 h-12 cursor-pointer flex justify-center items-center"
-                        onClick={() => handleRedo({ strokesRef, undoneStrokesRef })}
+                        onClick={() => redo()}
                     >
                         <Image
                             src={'/icons/undo.svg'}

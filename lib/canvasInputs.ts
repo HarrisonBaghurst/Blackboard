@@ -26,23 +26,13 @@ type handleMouseUpParameters = {
     e: React.MouseEvent;
     isDrawingRef: RefObject<boolean>;
     currentStrokeRef: RefObject<Stroke | null>;
-    strokesRef: RefObject<Stroke[]>;
     panStartRef: RefObject<Point | null>;
     lastPanOffsetRef: RefObject<Point>;
     panOffsetRef: RefObject<Point>;
+    onStrokeFinished: (stroke: Stroke) => void;
 };
 
-type handleUndoProps = {
-    strokesRef: RefObject<Stroke[]>;
-    undoneStrokesRef: RefObject<Stroke[]>;
-};
-
-type handleRedoProps = {
-    strokesRef: RefObject<Stroke[]>;
-    undoneStrokesRef: RefObject<Stroke[]>;
-};
-
-// --- helper ---
+// --- helpers ---
 
 const getMousePos = (e: React.MouseEvent): Point => {
     const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
@@ -114,19 +104,20 @@ export const handleMouseUp = ({
     e,
     isDrawingRef,
     currentStrokeRef,
-    strokesRef,
     panStartRef,
     lastPanOffsetRef,
     panOffsetRef,
+    onStrokeFinished,
 }: handleMouseUpParameters) => {
     if (e.button === 0 && isDrawingRef.current) {
         isDrawingRef.current = false;
         if (currentStrokeRef.current) {
             const simplified = simplifyRDP(currentStrokeRef.current.points, 1);
-            strokesRef.current.push({
+            const newStroke = ({
                 points: simplified,
                 colour: currentStrokeRef.current.colour,
-            });
+            })
+            onStrokeFinished(newStroke);
             currentStrokeRef.current = null;
         }
     }
@@ -134,29 +125,5 @@ export const handleMouseUp = ({
     if (e.button === 2) {
         panStartRef.current = null;
         lastPanOffsetRef.current = { ...panOffsetRef.current };
-    }
-};
-
-export const handleUndo = ({
-    strokesRef,
-    undoneStrokesRef,
-}: handleUndoProps) => {
-    if (strokesRef.current) {
-        const undoneStroke = strokesRef.current.pop();
-        if (undoneStroke && undoneStrokesRef.current) {
-            undoneStrokesRef.current.push(undoneStroke);
-        }
-    }
-};
-
-export const handleRedo = ({
-    strokesRef,
-    undoneStrokesRef,
-}: handleRedoProps) => {
-    if (undoneStrokesRef.current) {
-        const redoneStroke = undoneStrokesRef.current.pop();
-        if (redoneStroke && strokesRef.current) {
-            strokesRef.current.push(redoneStroke);
-        }
     }
 };
