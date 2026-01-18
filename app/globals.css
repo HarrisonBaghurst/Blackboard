@@ -72,7 +72,7 @@
 
   .button-style {
     background-color: var(--card-child-background);
-    border-radius: 100%;
+    border-radius: 5rem;
     box-shadow: 0 0 1px 1px var(--card-child-shadow);
   }
 }

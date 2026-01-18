@@ -17,7 +17,7 @@ const page = () => {
                 <h1 className='text-8xl font-young'>
                     Chalkie Chalkie
                 </h1>
-                <p className='text-4xl text-foreground-second pt-4'>
+                <p className='text-3xl text-foreground-second pt-4'>
                     Online collaborative whiteboard
                 </p>
                 <button
