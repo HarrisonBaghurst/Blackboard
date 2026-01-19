@@ -17,10 +17,10 @@ const page = () => {
         <>
             <div className='p-[10%] flex justify-between items-center'>
                 <div className='flex justify-center flex-col'>
-                    <h1 className='text-6xl font-young'>
+                    <h1 className='text-5xl font-young'>
                         Chalkie Chalkie
                     </h1>
-                    <p className='text-xl text-foreground-second pt-4'>
+                    <p className='text-sm text-foreground-second pt-4'>
                         An interactive, collaborative whiteboard for online tutoring.
                     </p>
                     <div className='flex gap-6 mt-8'>
@@ -45,7 +45,7 @@ const page = () => {
                 />
             </div>
             <div className='px-[10%] flex flex-col gap-10 pb-20'>
-                <div className='text-2xl'>
+                <div className='text-xl'>
                     Your existing boards
                 </div>
                 <div className='grid grid-cols-3 gap-8'>
