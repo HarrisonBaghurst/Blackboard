@@ -70,9 +70,15 @@
     box-shadow: 0 0 1px 1px var(--card-child-shadow);
   }
 
-  .button-style {
+  .button-style-primary {
     background-color: var(--card-child-background);
-    border-radius: 5rem;
+    border-radius: 20px;
+    box-shadow: 0 0 1px 1px var(--card-child-shadow);
+  }
+
+  .button-style-secondary {
+    border: 0.5rem solid var(--card-child-background);
+    border-radius: 20px;
     box-shadow: 0 0 1px 1px var(--card-child-shadow);
   }
 }

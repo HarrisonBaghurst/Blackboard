@@ -1,5 +1,7 @@
 'use client'
 
+import Button from '@/components/Button';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -12,22 +14,51 @@ const page = () => {
     }
 
     return (
-        <div className='w-dvw h-dvh flex justify-center items-center'>
-            <div className='flex justify-center flex-col items-center'>
-                <h1 className='text-8xl font-young'>
-                    Chalkie Chalkie
-                </h1>
-                <p className='text-3xl text-foreground-second pt-4'>
-                    Online collaborative whiteboard
-                </p>
-                <button
-                    className='button-style px-6 py-3 cursor-pointer mt-14 text-3xl'
-                    onClick={createBoard}
-                >
-                    Create new board
-                </button>
+        <>
+            <div className='p-[10%] flex justify-between items-center'>
+                <div className='flex justify-center flex-col'>
+                    <h1 className='text-6xl font-young'>
+                        Chalkie Chalkie
+                    </h1>
+                    <p className='text-xl text-foreground-second pt-4'>
+                        An interactive, collaborative whiteboard for online tutoring.
+                    </p>
+                    <div className='flex gap-6 mt-8'>
+                        <Button
+                            text='Create new board'
+                            handleClick={createBoard}
+                            variant='primary'
+                        />
+                        <Button
+                            text='Open existing board'
+                            handleClick={createBoard}
+                            variant='secondary'
+                        />
+                    </div>
+                </div>
+                <Image
+                    src={'/imgs/boardExample.png'}
+                    alt='Whiteboard Image'
+                    width={2048}
+                    height={0}
+                    className='card-style w-[40dvw]'
+                />
             </div>
-        </div>
+            <div className='px-[10%] flex flex-col gap-10 pb-20'>
+                <div className='text-2xl'>
+                    Your existing boards
+                </div>
+                <div className='grid grid-cols-3 gap-8'>
+                    {Array.from({ length: 5 }).map((_, index) => (
+                        <div
+                            key={index}
+                            className='card-style aspect-video'
+                        >
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </>
     )
 
 }
