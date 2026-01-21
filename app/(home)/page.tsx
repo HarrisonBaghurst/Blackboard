@@ -51,13 +51,15 @@ const page = () => {
     return (
         <div className='bg-background min-h-dvh'>
             <div className='bg-card-background rounded-b-xl mx-[8%] h-12 text-lg flex items-center px-4 justify-between'>
-                Chalkie Chalkie
+                <div className='cursor-default'>
+                    Chalkie Chalkie
+                </div>
                 <Image
                     src={'/icons/user.svg'}
                     width={0}
                     height={0}
                     alt='user'
-                    className='h-6 w-6'
+                    className='h-6 w-6 cursor-pointer'
                 />
             </div>
             <div className='mt-[20dvh] flex justify-center'>
