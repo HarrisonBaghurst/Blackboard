@@ -72,16 +72,6 @@
     box-shadow: 0 0 1px 1px var(--card-child-shadow);
   }
 
-  .button-style-primary {
-    background-color: var(--button-main);
-    border-radius: 10px;
-    box-shadow: 0 0 1px 1px var(--card-child-shadow);
-  }
-
-  .button-style-secondary {
-    border-radius: 10px;
-    box-shadow: 0 0 1px 1px var(--card-child-shadow);
-  }
 }
 
 body {

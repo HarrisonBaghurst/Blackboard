@@ -28,12 +28,12 @@ const page = () => {
             const tl = gsap.timeline();
 
             tl.fromTo(lettersRef.current,
-                { y: 50, opacity: 0 },
+                { y: 20, opacity: 0 },
                 { y: 0, opacity: 1, duration: 0.5, stagger: 0.04, ease: 'back.out(1.7)' },
             )
-                .to({}, { duration: 2 })
+                .to({}, { duration: 1 })
                 .to(lettersRef.current, {
-                    y: -50,
+                    y: -12,
                     opacity: 0,
                     duration: 0.4,
                     stagger: 0.03,
@@ -48,15 +48,15 @@ const page = () => {
     }, [wordIndex])
 
     return (
-        <>
+        <div className='bg-background min-h-dvh'>
             <div className='bg-card-background rounded-b-xl mx-[12%] h-12 text-lg flex items-center px-4 justify-between'>
                 Chalkie Chalkie
             </div>
             <div className='mt-[20dvh] flex justify-center'>
                 <div className='flex flex-col items-center justify-center gap-12'>
-                    <h1 className='font-mont-bold text-5xl'>
+                    <h1 className='font-mont-bold text-5xl bg'>
                         Your collaborative
-                        <span className='inline-flex overflow-hidden py-3 bg-yellow-400 m-3 w-66 justify-center rounded-full text-background'>
+                        <span className='inline-flex overflow-hidden py-3  m-3 w-58 justify-center'>
                             {currentWord.split('').map((char, i) => (
                                 <span
                                     key={`${char}-${i}`}
@@ -73,7 +73,19 @@ const page = () => {
                     </h1>
                 </div>
             </div>
-        </>
+            <div className='flex justify-center gap-12 mt-[4dvh]'>
+                <Button
+                    text='Create workspace'
+                    handleClick={createBoard}
+                    variant='primary'
+                />
+                <Button
+                    text='Join workspace'
+                    handleClick={() => { }}
+                    variant='secondary'
+                />
+            </div>
+        </div>
     )
 
 }
