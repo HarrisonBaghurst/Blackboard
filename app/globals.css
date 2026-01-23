@@ -17,7 +17,7 @@
   --foreground: hsl(0, 0, 92%);
   --foreground-second: hsl(0, 0, 60%);
 
-  --card-background: hsl(0, 0%, 13%);
+  --card-background: hsl(0, 1%, 18%);
   --card-shadow: hsl(0, 0, 12%);
   --card-child-background: hsl(0, 0, 28%);
   --card-child-shadow: hsl(0, 0, 20%);
