@@ -14,7 +14,7 @@ const Button = ({ text, handleClick, variant, icon }: ButtonProps) => {
         <motion.button
             className={cn('relative px-5 py-3 cursor-pointer text-2xl w-fit rounded-[5px] flex justify-between gap-3 items-center', variant === 'primary' ?
                 'bg-linear-to-b from-yellow-400 to-orange-400 text-background border shadow-[0_0_12px_rgba(255,190,0,0.35)] font-mont-bold' :
-                'bg-linear-to-t from-card-background to-[hsl(0,0,18%)] text-foreground'
+                'bg-linear-to-b from-card-background to-[hsl(0,0,18%)] text-foreground'
             )}
             onClick={handleClick}
             whileHover={{}}

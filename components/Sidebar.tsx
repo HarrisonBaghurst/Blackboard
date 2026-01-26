@@ -23,8 +23,8 @@ const Sidebar = ({ currentColourRef }: SidebarProps) => {
     const { undo, redo } = useHistory();
 
     return (
-        <div className="fixed bg-card-background rounded-xl right-2 top-1/2 -translate-y-1/2 p-4 overflow-hidden">
-            <div className="flex gap-4 flex-col">
+        <div className="fixed bg-card-background rounded-[5px] right-2 top-1/2 -translate-y-1/2 p-4 overflow-hidden">
+            <div className="flex gap-5 flex-col">
                 {tools.map((tool, index) => (
                     <motion.div
                         key={index}
@@ -32,7 +32,7 @@ const Sidebar = ({ currentColourRef }: SidebarProps) => {
                             setCurrentTool(index);
                             currentColourRef.current = tool[2];
                         }}
-                        className="w-46 h-10 relative will-change-transform translate-x-8"
+                        className="w-35 h-8 relative will-change-transform translate-x-8"
                         animate={{
                             translateX: currentTool === index ? '-2rem' : hoveredTool === index ? '-0.75rem' : 0
                         }}
@@ -51,6 +51,33 @@ const Sidebar = ({ currentColourRef }: SidebarProps) => {
                         />
                     </motion.div>
                 ))}
+                <div className="flex justify-evenly mt-(--padding) items-center rounded-full">
+                    <button
+                        className="w-10 h-10 cursor-pointer flex justify-center items-center"
+                        onClick={() => undo()}
+                    >
+                        <Image
+                            src={'/icons/undo.svg'}
+                            alt="undo arrow"
+                            width={0}
+                            height={0}
+                            className="w-7/10 h-7/10"
+                        />
+                    </button>
+                    <div className="h-8 w-0.5 rounded-full bg-(--arrow-color)" />
+                    <button
+                        className="w-10 h-10 cursor-pointer flex justify-center items-center"
+                        onClick={() => redo()}
+                    >
+                        <Image
+                            src={'/icons/undo.svg'}
+                            alt="undo arrow"
+                            width={0}
+                            height={0}
+                            className="w-7/10 h-7/10 scale-x-[-1]"
+                        />
+                    </button>
+                </div>
             </div>
             {/* 
                 
