@@ -8,17 +8,15 @@ import {
 } from "@liveblocks/react/suspense";
 import { LiveList } from "@liveblocks/client";
 
-const apiKey = process.env.NEXT_PUBLIC_LIVE_BLOCKS_API_KEY!;
-
-export function Room({ children }: { children: ReactNode }) {
+export function Room({ children, boardId }: { children: ReactNode, boardId: string }) {
     return (
-        <LiveblocksProvider publicApiKey={apiKey}>
+        <LiveblocksProvider authEndpoint={'/api/liveblocks-auth'}>
             <RoomProvider
-                id="my-room"
+                id={boardId}
                 initialPresence={{ cursor: null }}
                 initialStorage={{ canvasStrokes: new LiveList([]) }}
             >
-                <ClientSideSuspense fallback={<div>Loading…</div>}>
+                <ClientSideSuspense fallback={<div>Loading canvas…</div>}>
                     {children}
                 </ClientSideSuspense>
             </RoomProvider>
