@@ -4,28 +4,44 @@ import { RefObject, useState } from "react";
 import { motion } from 'framer-motion';
 import Image from "next/image";
 import { useHistory } from "@liveblocks/react";
+import { Tools } from "@/types/toolTypes";
 
 type SidebarProps = {
     currentColourRef: RefObject<string>;
+    currentToolRef: RefObject<Tools>;
 }
 
-const Sidebar = ({ currentColourRef }: SidebarProps) => {
-    const tools = [
+const Sidebar = ({ currentColourRef, currentToolRef }: SidebarProps) => {
+    const tools: { 'tool': Tools, 'code': string, 'name': string }[] = [
         {
+            'tool': 'pen',
             'code': '#dddddd',
             'name': 'White',
         },
         {
+            'tool': 'pen',
             'code': '#ffba00',
             'name': 'Yellow',
         },
         {
+            'tool': 'pen',
             'code': '#ed482b',
             'name': 'Red',
         },
         {
+            'tool': 'pen',
             'code': '#306bc9',
             'name': 'Blue',
+        },
+        {
+            'tool': 'pen',
+            'code': '#32b836',
+            'name': 'Green',
+        },
+        {
+            'tool': 'eraser',
+            'code': '#141414',
+            'name': 'Eraser',
         },
     ];
 
@@ -35,7 +51,7 @@ const Sidebar = ({ currentColourRef }: SidebarProps) => {
     const { undo, redo } = useHistory();
 
     return (
-        <div className="fixed bg-card-background rounded-[10px] right-2 top-1/2 -translate-y-1/2 p-4 overflow-hidden">
+        <div className="fixed bg-card-background rounded-[10px] left-2 top-1/2 -translate-y-1/2 p-4 overflow-hidden">
             <div className="flex gap-4 flex-col items-center">
                 {tools.map((tool, index) => (
                     <motion.div
@@ -46,6 +62,7 @@ const Sidebar = ({ currentColourRef }: SidebarProps) => {
                         onClick={() => {
                             setCurrentTool(index);
                             currentColourRef.current = tool.code;
+                            currentToolRef.current = tool.tool
                         }}
                         animate={{
                             rotateZ: currentTool === index ? -5 : hoveredTool === index ? -2 : 0
@@ -58,7 +75,7 @@ const Sidebar = ({ currentColourRef }: SidebarProps) => {
                             }}
 
                         />
-                        <p className="text-background text-sm absolute bottom-1 left-1 cursor-default">
+                        <p className="text-background text-sm absolute bottom-1 left-1 cursor-default font-bold">
                             {tool.name}
                         </p>
                     </motion.div>

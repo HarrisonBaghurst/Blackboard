@@ -7,9 +7,11 @@ import { Point, Stroke } from '@/types/strokeTypes';
 import Sidebar from './Sidebar';
 import { useHistory, useMutation, useMyPresence, useOthers, useStorage } from '@liveblocks/react';
 import Cursor from './Cursor'
+import { Tools } from '@/types/toolTypes';
 
 const Board = () => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const currentToolRef = useRef<Tools>('pen');
 
     // liveblocks storage - sync accross clients 
     const strokes = useStorage((root) => root.canvasStrokes);
@@ -18,6 +20,14 @@ const Board = () => {
     // use mutations to updated liveblocks storage 
     const addStroke = useMutation(({ storage }, stroke: Stroke) => {
         storage.get('canvasStrokes').push(stroke);
+    }, [])
+    const eraseStrokes = useMutation(({ storage }, strokeIds: string[]) => {
+        const strokes = storage.get('canvasStrokes');
+        for (let i = strokes.length - 1; i >= 0; i--) {
+            if (strokeIds.includes(strokes.get(i)!.id)) {
+                strokes.delete(i);
+            }
+        }
     }, [])
 
     // panning control 
@@ -106,7 +116,10 @@ const Board = () => {
                     />
                 );
             })}
-            <Sidebar currentColourRef={currentColourRef} />
+            <Sidebar
+                currentColourRef={currentColourRef}
+                currentToolRef={currentToolRef}
+            />
             <canvas
                 ref={canvasRef}
                 className="w-screen h-screen graph-paper"
@@ -118,6 +131,7 @@ const Board = () => {
                         isDrawingRef,
                         panStartRef,
                         lastPanOffsetRef,
+                        currentToolRef,
                     })
                 }
                 onMouseMove={(e) => {
@@ -128,6 +142,9 @@ const Board = () => {
                         panStartRef,
                         panOffsetRef,
                         lastPanOffsetRef,
+                        currentToolRef,
+                        strokes,
+                        onErase: eraseStrokes
                     });
                     handlePresenceUpdate(e)
                 }}
@@ -139,6 +156,7 @@ const Board = () => {
                         panStartRef,
                         lastPanOffsetRef,
                         panOffsetRef,
+                        currentToolRef,
                         onStrokeFinished: addStroke,
                     })
                 }

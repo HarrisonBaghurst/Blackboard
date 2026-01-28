@@ -4,6 +4,7 @@ export type Point = {
 }
 
 export type Stroke = {
+    id: string;
     points: Point[];
     colour: string;
 }

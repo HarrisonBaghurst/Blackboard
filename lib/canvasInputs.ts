@@ -1,6 +1,8 @@
 import { Point, Stroke } from '@/types/strokeTypes';
 import { simplifyRDP } from './strokeOptimisation';
 import { RefObject } from 'react';
+import { Tools } from '@/types/toolTypes';
+import { StrokeIntersectPoints } from './genometry';
 
 // --- type definitions ---
 
@@ -11,6 +13,7 @@ type handleMouseDownParameters = {
     isDrawingRef: RefObject<boolean>;
     panStartRef: RefObject<Point | null>;
     lastPanOffsetRef: RefObject<Point>;
+    currentToolRef: RefObject<Tools>;
 };
 
 type handleMouseMoveParameters = {
@@ -20,6 +23,9 @@ type handleMouseMoveParameters = {
     panStartRef: RefObject<Point | null>;
     panOffsetRef: RefObject<Point>;
     lastPanOffsetRef: RefObject<Point>;
+    currentToolRef: RefObject<Tools>;
+    strokes: readonly Stroke[] | null;
+    onErase: (strokeIds: string[]) => void;
 };
 
 type handleMouseUpParameters = {
@@ -29,6 +35,7 @@ type handleMouseUpParameters = {
     panStartRef: RefObject<Point | null>;
     lastPanOffsetRef: RefObject<Point>;
     panOffsetRef: RefObject<Point>;
+    currentToolRef: RefObject<Tools>;
     onStrokeFinished: (stroke: Stroke) => void;
 };
 
@@ -48,14 +55,16 @@ export const handleMouseDown = ({
     isDrawingRef,
     panStartRef,
     lastPanOffsetRef,
+    currentToolRef,
 }: handleMouseDownParameters) => {
     e.preventDefault();
 
-    if (e.buttons === 1) {
+    if (e.buttons === 1 && currentToolRef.current === 'pen') {
         // left click: start drawing
         isDrawingRef.current = true;
         const { x, y } = getMousePos(e);
         currentStrokeRef.current = {
+            id: crypto.randomUUID(),
             points: [{ x: x - lastPanOffsetRef.current.x, y: y - lastPanOffsetRef.current.y }],
             colour: currentColourRef.current,
         };
@@ -69,7 +78,9 @@ export const handleMouseDown = ({
 
 export const handleMouseMove = (() => {
     let lastTime = 0;
-    const THROTTLE_MS = 16; // 60 FPS
+    const THROTTLE_MS = 16; // ~60 FPS
+    const ERASER_RADIUS = 10;
+
     return ({
         e,
         currentStrokeRef,
@@ -77,27 +88,46 @@ export const handleMouseMove = (() => {
         panStartRef,
         panOffsetRef,
         lastPanOffsetRef,
+        currentToolRef,
+        strokes,
+        onErase,
     }: handleMouseMoveParameters) => {
         const now = performance.now();
         if (now - lastTime < THROTTLE_MS) return;
         lastTime = now;
 
-        if (e.buttons === 1 && isDrawingRef.current && currentStrokeRef.current) {
-            const { x, y } = getMousePos(e);
-            currentStrokeRef.current.points.push({
-                x: x - lastPanOffsetRef.current.x,
-                y: y - lastPanOffsetRef.current.y,
-            });
+        const { x, y } = getMousePos(e);
+        const worldPoint = {
+            x: x - lastPanOffsetRef.current.x,
+            y: y - lastPanOffsetRef.current.y,
         }
 
+        // drawing with pen 
+        if (currentToolRef.current === 'pen' && e.buttons === 1 && isDrawingRef.current && currentStrokeRef.current) {
+            currentStrokeRef.current.points.push(worldPoint);
+            return;
+        }
+
+        // removing with eraser 
+        if (currentToolRef.current === 'eraser' && e.buttons === 1 && strokes) {
+            const hitStrokeIds = strokes
+                .filter(strokes => StrokeIntersectPoints(strokes, worldPoint, ERASER_RADIUS))
+                .map(stroke => stroke.id);
+
+            if (hitStrokeIds.length >= 1) {
+                onErase(hitStrokeIds);
+            }
+            return;
+        }
+
+        // panning 
         if (e.buttons === 2 && panStartRef.current) {
-            const { x, y } = getMousePos(e);
             panOffsetRef.current = {
                 x: lastPanOffsetRef.current.x + (x - panStartRef.current.x),
                 y: lastPanOffsetRef.current.y + (y - panStartRef.current.y),
-            };
+            }
         }
-    };
+    }
 })();
 
 export const handleMouseUp = ({
@@ -107,13 +137,15 @@ export const handleMouseUp = ({
     panStartRef,
     lastPanOffsetRef,
     panOffsetRef,
+    currentToolRef,
     onStrokeFinished,
 }: handleMouseUpParameters) => {
-    if (e.button === 0 && isDrawingRef.current) {
+    if (e.button === 0 && isDrawingRef.current && currentToolRef.current === 'pen') {
         isDrawingRef.current = false;
         if (currentStrokeRef.current) {
             const simplified = simplifyRDP(currentStrokeRef.current.points, 1);
             const newStroke = ({
+                id: crypto.randomUUID(),
                 points: simplified,
                 colour: currentStrokeRef.current.colour,
             })
@@ -122,7 +154,7 @@ export const handleMouseUp = ({
         }
     }
 
-    if (e.button === 2) {
+    else if (e.button === 2) {
         panStartRef.current = null;
         lastPanOffsetRef.current = { ...panOffsetRef.current };
     }

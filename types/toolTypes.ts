@@ -1,0 +1,1 @@
+export type Tools = 'pen' | 'eraser'
