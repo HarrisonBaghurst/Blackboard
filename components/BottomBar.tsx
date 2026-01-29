@@ -2,16 +2,15 @@
 
 import { RefObject, useState } from "react";
 import { motion } from 'framer-motion';
-import Image from "next/image";
 import { useHistory } from "@liveblocks/react";
 import { Tools } from "@/types/toolTypes";
 
-type SidebarProps = {
+type BottomBarProps = {
     currentColourRef: RefObject<string>;
     currentToolRef: RefObject<Tools>;
 }
 
-const Sidebar = ({ currentColourRef, currentToolRef }: SidebarProps) => {
+const Sidebar = ({ currentColourRef, currentToolRef }: BottomBarProps) => {
     const tools: { 'tool': Tools, 'code': string, 'name': string }[] = [
         {
             'tool': 'pen',
@@ -51,6 +50,34 @@ const Sidebar = ({ currentColourRef, currentToolRef }: SidebarProps) => {
     const { undo, redo } = useHistory();
 
     return (
+        <div className="
+        fixed bottom-2 left-1/2 -translate-x-1/2 h-14 rounded-sm flex gap-2 p-2 items-end
+        bg-linear-to-b from-card-background/60 to-[hsl(0,0,18%)]/60 backdrop-blur-md border-b-white/25 border-b"
+        >
+            {tools.map((tool, index) => (
+                <motion.div
+                    key={index}
+                    className="w-10 h-fit bg-white rounded-[1px] p-0.5 aspect-square"
+                    animate={{ width: currentTool === index ? '3.25rem' : hoveredTool === index ? '2.75rem' : '2.5rem' }}
+                    onClick={() => {
+                        setCurrentTool(index);
+                        currentColourRef.current = tool.code;
+                        currentToolRef.current = tool.tool;
+                    }}
+                    onHoverStart={() => setHoveredTool(index)}
+                    onHoverEnd={() => setHoveredTool(null)}
+                    transition={{
+                        type: 'spring',
+                        stiffness: 500,
+                        damping: 25,
+                    }}
+                    style={{ backgroundColor: `${tool.code}` }}
+                >
+                </motion.div>
+            ))}
+
+
+            {/*
         <div className="fixed bg-card-background rounded-[10px] left-2 top-1/2 -translate-y-1/2 p-4 overflow-hidden">
             <div className="flex gap-4 flex-col items-center">
                 {tools.map((tool, index) => (
@@ -108,6 +135,8 @@ const Sidebar = ({ currentColourRef, currentToolRef }: SidebarProps) => {
                     </button>
                 </div>
             </div>
+        </div>
+        */}
         </div>
     )
 }

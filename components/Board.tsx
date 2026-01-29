@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import drawToCanvas from '@/lib/canvasDrawing';
 import { handleMouseDown, handleMouseMove, handleMouseUp } from '@/lib/canvasInputs';
 import { Point, Stroke } from '@/types/strokeTypes';
-import Sidebar from './Sidebar';
+import Sidebar from './BottomBar';
 import { useHistory, useMutation, useMyPresence, useOthers, useStorage } from '@liveblocks/react';
 import Cursor from './Cursor'
 import { Tools } from '@/types/toolTypes';
